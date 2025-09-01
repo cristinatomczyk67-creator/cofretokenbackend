@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CofreToken • Seu cofre, sua liberdade</title>
+  <meta name="description" content="CofreToken é um ecossistema de cripto lastreado em ativos reais com foco em educação financeira. Compre pelo QR, acompanhe o saldo e participe do marketplace."/>
+  <meta property="og:title" content="CofreToken • Seu cofre, sua liberdade"/>
+  <meta property="og:og:description" content="Compre COFRE, acompanhe a valorização e use no ecossistema."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:image" content="https://placehold.co/1200x630/0b0b0f/ffd700?text=CofreToken"/>
+  
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Ccircle cx='128' cy='128' r='120' fill='%230b0b0f'/%3E%3Cpath d='M86 86h84v84H86z' fill='%23ffd700'/%3E%3Ccircle cx='128' cy='128' r='18' fill='%230b0b0f'/%3E%3C/svg%3E" />
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  
+  <style>
+    /* Variáveis de cores para o tema escuro */
+    :root{--bg:#0b0b0f;--card:#121218;--muted:#1a1a22;--brand:#ffd700;--txt:#e7e7ee;--soft:#b7b7c9}
+    html,body{background:var(--bg);color:var(--txt); scroll-behavior: smooth;}
+    /* Efeito de "vidro" para as caixas */
+    .glass{background:linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.08)}
+    /* Efeito de brilho animado no topo */
+    .shine{background:linear-gradient(120deg, rgba(255,215,0,.35), rgba(255,215,0,.1) 40%, rgba(255,215,0,.35));background-size:200% 200%;animation:shine 8s ease-in-out infinite}
+    @keyframes shine{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+    
+    /* Animação do spinner de carregamento */
+    .spinner { border: 2px solid #f3f3f3; border-top: 2px solid var(--bg); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    
+    /* Mobile menu */
+    .mobile-menu { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+    .mobile-menu.open { max-height: 300px; }
+  </style>
+</head>
+<body class="antialiased selection:bg-yellow-300 selection:text-black">
+  <div id="config" data-backend-url="https://seu-backend-aqui.netlify.app/.netlify/functions/create-preference" class="hidden"></div>
+
+  <header class="sticky top-0 z-50 border-b border-white/10 bg-black/30 backdrop-blur">
+    <div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-3">
+        <img src="COFRETTOKENLOGOOFICIAL.png" alt="CofreToken Logo" class="h-9 w-9" />
+        <span class="font-semibold tracking-wide">CofreToken</span>
+      </a>
+      
+      <button id="mobileMenuBtn" class="md:hidden p-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+        </svg>
+      </button>
+      
+      <nav class="hidden md:flex items-center gap-6 text-sm text-[--soft]">
+        <a href="#comprar" class="hover:text-[--brand]">Comprar</a>
+        <a href="#tokenomics" class="hover:text-[--brand]">Tokenomics</a>
+        <a href="#simulador" class="hover:text-[--brand]">Simulador</a>
+        <a href="#roadmap" class="hover:text-[--brand]">Roadmap</a>
+        <a href="#faq" class="hover:text-[--brand]">FAQ</a>
+      </nav>
+      <a href="#comprar" class="hidden md:inline-flex items-center gap-2 rounded-xl bg-[--brand] px-4 py-2 text-black font-semibold shadow-lg hover:shadow-yellow-500/20 transition-shadow">Comprar COFRE</a>
+    </div>
+    
+    <div id="mobileMenu" class="mobile-menu md:hidden bg-[--bg] border-t border-white/10">
+      <div class="px-4 py-3 space-y-3">
+        <a href="#comprar" class="block py-2 hover:text-[--brand]">Comprar</a>
+        <a href="#tokenomics" class="block py-2 hover:text-[--brand]">Tokenomics</a>
+        <a href="#simulador" class="block py-2 hover:text-[--brand]">Simulador</a>
+        <a href="#roadmap" class="block py-2 hover:text-[--brand]">Roadmap</a>
+        <a href="#faq" class="block py-2 hover:text-[--brand]">FAQ</a>
+        <a href="#comprar" class="block py-2 rounded-xl bg-[--brand] text-black font-semibold text-center">Comprar COFRE</a>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="relative overflow-hidden">
+      <div class="absolute inset-0 -z-10 shine opacity-20"></div>
+      <div class="mx-auto max-w-7xl px-4 py-20 grid lg:grid-cols-2 gap-10 items-center">
+        <div>
+          <h1 class="text-4xl md:text-6xl font-black leading-tight">Seu cofre, sua liberdade.<br/><span class="text-[--brand]">CofreToken</span></h1>
+          <p class="mt-5 text-lg text-[--soft] max-w-xl">Token com foco em educação financeira, utilidade real e valorização programada. Compre fácil via QR e acompanhe tudo no seu painel.</p>
+          <div class="mt-8 flex gap-3 flex-wrap">
+            <a href="#comprar" class="inline-flex items-center rounded-xl bg-[--brand] px-5 py-3 text-black font-semibold">Comprar agora</a>
+            <a href="#tokenomics" class="inline-flex items-center rounded-xl border border-white/15 px-5 py-3">Ler Tokenomics</a>
+          </div>
+          <div class="mt-6 text-sm text-[--soft]">Preço inicial: <span class="font-semibold text-white">R$ 0,25</span> • Regra: +10% a cada R$ 1 milhão</div>
+        </div>
+        <div class="glass rounded-2xl p-6">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm text-[--soft]">Supply</div>
+              <div class="text-2xl font-bold">1.000.000.000 COFRE</div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm text-[--soft]">Vendidos</div>
+              <div id="soldDisplay" class="text-2xl font-bold">0</div>
+            </div>
+          </div>
+          <div class="mt-5">
+            <div class="h-3 w-full rounded-full bg-[--muted]">
+              <div id="soldBar" class="h-3 rounded-full bg-[--brand] transition-all duration-500" style="width:0%"></div>
+            </div>
+            <div class="mt-2 text-xs text-[--soft]">Meta Fase 1: vender 50.000.000 COFRE</div>
+          </div>
+          <div class="mt-6 grid grid-cols-2 gap-4 text-sm">
+            <div class="rounded-xl bg-[--card] p-4">
+              <div class="text-[--soft]">Preço atual</div>
+              <div id="priceNow" class="text-xl font-bold">R$ 0,25</div>
+            </div>
+            <div class="rounded-xl bg-[--card] p-4">
+              <div class="text-[--soft]">Arrecadação</div>
+              <div id="raisedNow" class="text-xl font-bold">R$ 0,00</div>
+            </div>
+          </div>
+          <div id="realtimeInfo" class="mt-4 text-xs text-[--soft] text-center"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="comprar" class="py-16 border-t border-white/10">
+      <div class="mx-auto max-w-7xl px-4 grid lg:grid-cols-2 gap-10 items-start">
+        <div>
+          <h2 class="text-3xl md:text-4xl font-extrabold">Compre COFRE via QR</h2>
+          <p class="mt-3 text-[--soft] max-w-prose">Pagamento processado pelo Mercado Pago. Após confirmação você recebe seu crédito COFRE na sua conta (custodiada) e pode acompanhar a valorização. Protótipo: use valores de teste.</p>
+
+          <form id="buyForm" class="mt-6 space-y-4 max-w-md">
+            <div>
+              <label for="amount" class="block mb-1 text-sm text-[--soft]">Valor da compra (R$)</label>
+              <input id="amount" type="number" min="10" step="0.01" value="100" class="w-full rounded-xl bg-[--card] border border-white/10 px-4 py-3 focus:ring-2 focus:ring-[--brand] focus:outline-none" required />
+            </div>
+            <div>
+              <label for="email" class="block mb-1 text-sm text-[--soft]">Seu e-mail</label>
+              <input id="email" type="email" placeholder="voce@email.com" class="w-full rounded-xl bg-[--card] border border-white/10 px-4 py-3 focus:ring-2 focus:ring-[--brand] focus:outline-none" required/>
+            </div>
+            <button id="buyBtn" type="submit" class="w-full rounded-xl bg-[--brand] text-black font-semibold py-3 flex items-center justify-center gap-2 disabled:opacity-50">
+              <span id="buyBtnText">Gerar QR / Checkout</span>
+              <div id="buyBtnSpinner" class="spinner hidden"></div>
+            </button>
+            <p class="text-xs text-[--soft]">Ao prosseguir, você concorda com os Termos e Política de Risco. Este é um protótipo para validação.</p>
+          </form>
+        </div>
+
+        <div class="glass rounded-2xl p-6">
+          <h3 class="text-xl font-bold">QR / Link de pagamento</h3>
+          <p id="qrHelpText" class="text-sm text-[--soft]">Gere uma ordem de compra para visualizar o QR Code.</p>
+          <div id="qrArea" class="mt-4 rounded-xl bg-white p-4 aspect-square grid place-items-center text-center text-[--soft] transition-opacity duration-300 opacity-20">
+             </div>
+          <div id="paymentActions" class="hidden mt-4 space-y-2">
+             <input id="pixCode" type="text" readonly class="w-full text-xs rounded-lg bg-[--card] border-white/10 px-3 py-2" value="">
+             <button id="copyBtn" class="w-full rounded-xl bg-white/10 px-4 py-2 hover:bg-white/20 text-sm">Copiar código PIX</button>
+             <a id="payLink" href="#" target="_blank" class="inline-flex items-center justify-center w-full rounded-xl bg-white/10 px-4 py-3 hover:bg-white/20">Abrir checkout</a>
+          </div>
+          <div id="buyMsg" class="mt-3 text-sm text-[--soft]"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tokenomics" class="py-16 border-t border-white/10 bg-[--card]/30">
+        <div class="mx-auto max-w-7xl px-4">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-center">Tokenomics</h2>
+            <p class="mt-3 text-[--soft] max-w-prose mx-auto text-center">Supply total de <strong>1.000.000.000 COFRE</strong>. Distribuição planejada para sustentabilidade do ecossistema e proteção de liquidez.</p>
+            <div class="mt-8 grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+                <div class="rounded-2xl bg-[--card] p-5"><div class="text-[--soft]">Público investidor</div><div class="text-2xl font-bold">50% (500M)</div></div>
+                <div class="rounded-2xl bg-[--card] p-5"><div class="text-[--soft]">Reserva estratégica (Allou)</div><div class="text-2xl font-bold">30% (300M)</div></div>
+                <div class="rounded-2xl bg-[--card] p-5"><div class="text-[--soft]">Equipe & Dev</div><div class="text-2xl font-bold">10% (100M)</div></div>
+                <div class="rounded-2xl bg-[--card] p-5"><div class="text-[--soft]">Marketing & Parcerias</div><div class="text-2xl font-bold">10% (100M)</div></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="simulador" class="py-16 border-t border-white/10">
+      <div class="mx-auto max-w-7xl px-4 grid lg:grid-cols-2 gap-10 items-start">
+        <div>
+          <h2 class="text-3xl md:text-4xl font-extrabold">Simulador de valorização</h2>
+          <p class="mt-3 text-[--soft]">Modelo demonstrativo: preço inicial <b>R$0,25</b> e +10% a cada <b>R$1.000.000</b> recebidos. Use para entender a dinâmica de degraus.</p>
+          <form id="simForm" class="mt-6 grid grid-cols-2 gap-4 max-w-md text-sm">
+            <label class="col-span-2"><span class="block mb-1 text-[--soft]">Preço inicial (R$)</span><input id="simStart" type="number" step="0.0001" value="0.25" class="w-full rounded-xl bg-[--card] border border-white/10 px-4 py-2"/></label>
+            <label><span class="block mb-1 text-[--soft]">Degrau (R$ mi)</span><input id="simStep" type="number" step="0.1" value="1" class="w-full rounded-xl bg-[--card] border border-white/10 px-4 py-2"/></label>
+            <label><span class="block mb-1 text-[--soft]">Aumento por degrau</span><select id="simInc" class="w-full rounded-xl bg-[--card] border border-white/10 px-4 py-2 appearance-none"><option value="0.10">+10%</option><option value="0.05">+5%</option><option value="0.20">+20%</option></select></label>
+            <label class="col-span-2"><span class="block mb-1 text-[--soft]">Objetivo arrecadação (R$ mi)</span><input id="simTarget" type="number" step="0.1" value="10" class="w-full rounded-xl bg-[--card] border border-white/10 px-4 py-2"/></label>
+            <button type="submit" class="col-span-2 rounded-xl bg-[--brand] text-black font-semibold py-3">Simular</button>
+          </form>
+          <p id="simMsg" class="mt-4 text-sm text-[--soft]"></p>
+        </div>
+        <div class="glass rounded-2xl p-6">
+          <h3 class="text-xl font-bold">Resultado</h3>
+          <div class="mt-3 grid md:grid-cols-2 gap-4 text-sm">
+            <div class="rounded-xl bg-[--card] p-4"><div class="text-[--soft]">Preço final</div><div id="simPrice" class="text-xl font-bold">—</div></div>
+            <div class="rounded-xl bg-[--card] p-4"><div class="text-[--soft]">Degraus</div><div id="simSteps" class="text-xl font-bold">—</div></div>
+            <div class="rounded-xl bg-[--card] p-4 md:col-span-2"><div class="text-[--soft]">Tokens aproximados vendidos</div><div id="simTokens" class="text-xl font-bold">—</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="roadmap" class="py-16 border-t border-white/10 bg-[--card]/30">
+      <div class="mx-auto max-w-7xl px-4">
+        <h2 class="text-3xl md:text-4xl font-extrabold text-center">Roadmap</h2>
+        <div class="mt-8 grid md:grid-cols-3 gap-6 text-sm">
+          <div class="rounded-2xl bg-[--card] p-5 border border-white/10"><div class="text-[--brand] font-bold">Fase 1</div><div class="mt-2 font-semibold">Lançamento & Pré-venda</div><ul class="mt-3 list-disc list-inside text-[--soft] space-y-1"><li>Landing + checkout QR</li><li>Conta custodiada</li><li>Whitepaper v1</li></ul></div>
+          <div class="rounded-2xl bg-[--card] p-5 border border-white/10"><div class="text-[--brand] font-bold">Fase 2</div><div class="mt-2 font-semibold">Token on-chain</div><ul class="mt-3 list-disc list-inside text-[--soft] space-y-1"><li>Contrato (BEP‑20)</li><li>DEX + liquidez</li><li>Painel investidor</li></ul></div>
+          <div class="rounded-2xl bg-[--card] p-5 border border-white/10"><div class="text-[--brand] font-bold">Fase 3</div><div class="mt-2 font-semibold">Ecossistema & Marketplace</div><ul class="mt-3 list-disc list-inside text-[--soft] space-y-1"><li>Pagamentos parceiros</li><li>Cabanas & serviços</li><li>App Cofre</li></ul></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="faq" class="py-16 border-t border-white/10">
+      <div class="mx-auto max-w-5xl px-4">
+        <h2 class="text-3xl md:text-4xl font-extrabold text-center">Perguntas Frequentes</h2>
+        <div class="mt-8 space-y-4">
+          <details class="rounded-xl bg-[--card] p-5 border border-white/10" open><summary class="cursor-pointer font-semibold">Como o preço sobe?</summary><p class="mt-2 text-[--soft]">Nesta fase de pré-venda, adotamos degraus: a cada R$1.000.000 arrecadados o preço é ajustado +10%. É um modelo demonstrativo para dar previsibilidade.</p></details>
+          <details class="rounded-xl bg-[--card] p-5 border border-white/10"><summary class="cursor-pointer font-semibold">Onde ficam meus tokens?</summary><p class="mt-2 text-[--soft]">Em conta custodiada vinculada ao seu cadastro. Na fase 2 você poderá conectar sua carteira (ex.: MetaMask) e fazer a retirada conforme regras do vesting.</p></details>
+          <details class="rounded-xl bg-[--card] p-5 border border-white/10"><summary class="cursor-pointer font-semibold">Posso vender antes do período de trava?</summary><p class="mt-2 text-[--soft]">A proposta educativa prevê trava de 18 meses. Antes disso, você poderá usar seus tokens no ecossistema (serviços e produtos).</p></details>
+        </div>
+        <p class="mt-8 text-xs text-[--soft] text-center">Este site é um protótipo. Criptoativos envolvem riscos. Leia os termos antes de investir.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/10 py-10 text-center text-sm text-[--soft]">
+    © <span id="year"></span> CofreToken • Allou Tecnologia. Todos os direitos reservados.
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // --- Seleção de Elementos DOM ---
+      const backendURL = document.getElementById('config').dataset.backendUrl;
+      const buyForm = document.getElementById('buyForm');
+      const amountInput = document.getElementById('amount');
+      const emailInput = document.getElementById('email');
+      const buyBtn = document.getElementById('buyBtn');
+      const buyBtnText = document.getElementById('buyBtnText');
+      const buyBtnSpinner = document.getElementById('buyBtnSpinner');
+      const buyMsg = document.getElementById('buyMsg');
+      const payLink = document.getElementById('payLink');
+      const qrArea = document.getElementById('qrArea');
+      const qrHelpText = document.getElementById('qrHelpText');
+      const paymentActions = document.getElementById('paymentActions');
+      const pixCodeInput = document.getElementById('pixCode');
+      const copyBtn = document.getElementById('copyBtn');
+      const simForm = document.getElementById('simForm');
+      const yearEl = document.getElementById('year');
+      const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+      const mobileMenu = document.getElementById('mobileMenu');
+      const realtimeInfo = document.getElementById('realtimeInfo');
+      
+      let qrcode = null; // Variável para armazenar a instância do QRCode
+
+      // --- Funções Utilitárias ---
+      // Formata um valor numérico para a moeda brasileira (BRL).
+      const fmtBRL = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+      
+      // Valida um e-mail usando uma expressão regular simples.
+      const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+      // --- MENU MOBILE ---
+      mobileMenuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('open');
+      });
+
+      // Fechar menu ao clicar em um link
+      document.querySelectorAll('#mobileMenu a').forEach(link => {
+        link.addEventListener('click', () => {
+          mobileMenu.classList.remove('open');
+        });
+      });
+
+      // --- Lógica da Seção Principal (Simulação) ---
+      let sold = 1250000; // Tokens vendidos (valor inicial de demonstração)
+      const soldGoal = 50_000_000;
+      const price0 = 0.25; // Preço inicial em R$
+      let raised = 312500; // Arrecadação em R$ (valor inicial de demonstração)
+      let lastUpdate = Date.now();
+
+      // Atualiza os dados de exibição na seção principal.
+      function renderHero() {
+        document.getElementById('soldDisplay').textContent = sold.toLocaleString('pt-BR');
+        const pct = Math.min(100, (sold / soldGoal) * 100);
+        document.getElementById('soldBar').style.width = pct + '%';
+        // Calcula o preço atual com base nos degraus de arrecadação.
+        const currentPrice = price0 * Math.pow(1.1, Math.floor(raised / 1_000_000));
+        document.getElementById('priceNow').textContent = fmtBRL(currentPrice);
+        document.getElementById('raisedNow').textContent = fmtBRL(raised);
+      }
+
+      // Simula o crescimento de dados em tempo real.
+      function simulateRealtimeData() {
+        const now = Date.now();
+        const timeDiff = (now - lastUpdate) / 1000; // diferença em segundos
+        
+        // Ajustar a taxa de atualização baseada no tempo
+        const tokensPerSecond = 1000 / timeDiff;
+        const reaisPerSecond = 250 / timeDiff;
+        
+        sold += Math.floor(tokensPerSecond);
+        raised += Math.floor(reaisPerSecond);
+        
+        if (sold > soldGoal) {
+          sold = soldGoal;
+        }
+        
+        renderHero();
+        
+        // Atualizar informações em tempo real
+        realtimeInfo.textContent = Atualizado há ${Math.floor(timeDiff)} segundos - ${Math.floor(tokensPerSecond)} tokens/segundo;
+        
+        lastUpdate = now;
+      }
+
+      // --- Lógica do Formulário de Compra ---
+      buyForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const amount = Number(amountInput.value || 0);
+        const email = emailInput.value || '';
+
+        // Validação simples
+        if (amount < 10) {
+          buyMsg.textContent = 'O valor mínimo para compra é R$ 10,00.';
+          return;
+        }
+        if (!validateEmail(email)) {
+          buyMsg.textContent = 'Por favor, insira um e-mail válido.';
+          return;
+        }
+
+        // Estado de carregamento
+        buyBtn.disabled = true;
+        buyBtnText.textContent = 'Gerando...';
+        buyBtnSpinner.classList.remove('hidden');
+        buyMsg.textContent = 'Gerando sua ordem de pagamento...';
+        qrArea.style.opacity = '0.2';
+        paymentActions.classList.add('hidden');
+
+        try {
+          // Checa se o URL do backend ainda é o placeholder
+          if (backendURL.includes("seu-backend-aqui")) {
+              // Modo de demonstração: simula uma resposta do backend com um atraso de 1.5 segundos
+              await new Promise(resolve => setTimeout(resolve, 1500));
+              
+              const demoData = {
+                  init_point: "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=123456789",
+                  point_of_interaction: {
+                      transaction_data: {
+                          qr_code: "00020101021226860014br.gov.bcb.pix25615api.mercadopago.com/v1/payments/123456789/pix?hash=3a0d5a0e8f7b1c4e5d6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2"
+                      }
+                  }
+              };
+              
+              payLink.href = demoData.init_point;
+              pixCodeInput.value = demoData.point_of_interaction.transaction_data.qr_code;
+
+              qrArea.innerHTML = '';
+              qrcode = new QRCode(qrArea, {
+                  text: demoData.point_of_interaction.transaction_data.qr_code,
+                  width: 256,
+                  height: 256,
+                  colorDark : "#000000",
+                  colorLight : "#ffffff",
+                  correctLevel : QRCode.CorrectLevel.H
+              });
+
+              qrArea.style.opacity = '1';
+              qrHelpText.classList.add('hidden');
+              paymentActions.classList.remove('hidden');
+              buyMsg.textContent = 'Modo de demonstração: QR Code gerado com dados fictícios. Configure seu backend real para processar pagamentos.';
+          } else {
+            const res = await fetch(backendURL, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ amount, description: 'Compra CofreToken', payer_email: email })
+            });
+            const data = await res.json();
+            if (!res.ok || !data.ok) throw new Error(data.error || 'Falha ao criar preferência de pagamento.');
+            
+            const initPoint = data.init_point || data.sandbox_init_point;
+            const pixCopyPaste = data.point_of_interaction?.transaction_data?.qr_code;
+
+            payLink.href = initPoint;
+            pixCodeInput.value = pixCopyPaste || 'Código indisponível';
+
+            qrArea.innerHTML = '';
+            if (pixCopyPaste) {
+              qrcode = new QRCode(qrArea, {
+                  text: pixCopyPaste,
+                  width: 256,
+                  height: 256,
+                  colorDark : "#000000",
+                  colorLight : "#ffffff",
+                  correctLevel : QRCode.CorrectLevel.H
+              });
+            } else {
+                qrArea.innerHTML = '<p class="text-xs">Não foi possível gerar o QR Code.</p>';
+            }
+
+            qrArea.style.opacity = '1';
+            qrHelpText.classList.add('hidden');
+            paymentActions.classList.remove('hidden');
+            buyMsg.textContent = 'Pronto! Escaneie o QR Code ou use o link para pagar.';
+          }
+
+        } catch (err) {
+          buyMsg.textContent = 'Erro: ' + err.message;
+        } finally {
+          buyBtn.disabled = false;
+          buyBtnText.textContent = 'Gerar QR / Checkout';
+          buyBtnSpinner.classList.add('hidden');
+        }
+      });
+      
+      copyBtn.addEventListener('click', () => {
+          pixCodeInput.select();
+          document.execCommand('copy');
+          copyBtn.textContent = 'Copiado!';
+          setTimeout(() => { copyBtn.textContent = 'Copiar código PIX'; }, 2000);
+      });
+
+      // --- LÓGICA DO SIMULADOR ---
+      simForm.addEventListener('submit', (e)=>{
+        e.preventDefault();
+        const start = Number(document.getElementById('simStart').value || 0.25);
+        const stepMi = Number(document.getElementById('simStep').value || 1);
+        const inc = Number(document.getElementById('simInc').value || 0.10);
+        const targetMi = Number(document.getElementById('simTarget').value || 10);
+        const target = targetMi * 1_000_000;
+        let raisedTmp = 0, price = start, steps = 0, tokens = 0;
+        while(raisedTmp < target){
+          const stepValue = stepMi * 1_000_000;
+          const remaining = target - raisedTmp;
+          const nextStep = Math.min(remaining, stepValue);
+          tokens += nextStep / price;
+          raisedTmp += nextStep;
+          if(raisedTmp < target || (raisedTmp === target && nextStep === stepValue)){ 
+            price *= (1 + inc); 
+            steps++; 
+          }
+        }
+        document.getElementById('simPrice').textContent = fmtBRL(price / (1 + inc));
+        document.getElementById('simSteps').textContent = steps.toString();
+        document.getElementById('simTokens').textContent = tokens.toLocaleString('pt-BR', {maximumFractionDigits:0});
+        document.getElementById('simMsg').textContent = 'Modelo demonstrativo. Ajuste os parâmetros para sua campanha.';
+      });
+      
+      // --- INICIALIZAÇÃO ---
+      yearEl.textContent = new Date().getFullYear();
+      renderHero();
+      // O setInterval para a simulação de dados em tempo real
+      setInterval(simulateRealtimeData, 2000);
+      simForm.dispatchEvent(new Event('submit'));
+    });
+  </script>
+</body>
+</html>
