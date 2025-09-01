@@ -16,20 +16,13 @@
   <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
   
   <style>
-    /* Variáveis de cores para o tema escuro */
     :root{--bg:#0b0b0f;--card:#121218;--muted:#1a1a22;--brand:#ffd700;--txt:#e7e7ee;--soft:#b7b7c9}
     html,body{background:var(--bg);color:var(--txt); scroll-behavior: smooth;}
-    /* Efeito de "vidro" para as caixas */
     .glass{background:linear-gradient(180deg,rgba(255,255,255,0.06),rgba(255,255,255,0.02));backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.08)}
-    /* Efeito de brilho animado no topo */
     .shine{background:linear-gradient(120deg, rgba(255,215,0,.35), rgba(255,215,0,.1) 40%, rgba(255,215,0,.35));background-size:200% 200%;animation:shine 8s ease-in-out infinite}
     @keyframes shine{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-    
-    /* Animação do spinner de carregamento */
     .spinner { border: 2px solid #f3f3f3; border-top: 2px solid var(--bg); border-radius: 50%; width: 16px; height: 16px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    
-    /* Mobile menu */
     .mobile-menu { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
     .mobile-menu.open { max-height: 300px; }
   </style>
@@ -223,7 +216,6 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // --- Seleção de Elementos DOM ---
       const backendURL = document.getElementById('config').dataset.backendUrl;
       const buyForm = document.getElementById('buyForm');
       const amountInput = document.getElementById('amount');
@@ -244,76 +236,55 @@
       const mobileMenu = document.getElementById('mobileMenu');
       const realtimeInfo = document.getElementById('realtimeInfo');
       
-      let qrcode = null; // Variável para armazenar a instância do QRCode
+      let qrcode = null;
 
-      // --- Funções Utilitárias ---
-      // Formata um valor numérico para a moeda brasileira (BRL).
       const fmtBRL = v => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-      
-      // Valida um e-mail usando uma expressão regular simples.
       const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-      // --- MENU MOBILE ---
       mobileMenuBtn.addEventListener('click', () => {
         mobileMenu.classList.toggle('open');
       });
 
-      // Fechar menu ao clicar em um link
       document.querySelectorAll('#mobileMenu a').forEach(link => {
         link.addEventListener('click', () => {
           mobileMenu.classList.remove('open');
         });
       });
 
-      // --- Lógica da Seção Principal (Simulação) ---
-      let sold = 1250000; // Tokens vendidos (valor inicial de demonstração)
+      let sold = 1250000;
       const soldGoal = 50_000_000;
-      const price0 = 0.25; // Preço inicial em R$
-      let raised = 312500; // Arrecadação em R$ (valor inicial de demonstração)
+      const price0 = 0.25;
+      let raised = 312500;
       let lastUpdate = Date.now();
 
-      // Atualiza os dados de exibição na seção principal.
       function renderHero() {
         document.getElementById('soldDisplay').textContent = sold.toLocaleString('pt-BR');
         const pct = Math.min(100, (sold / soldGoal) * 100);
         document.getElementById('soldBar').style.width = pct + '%';
-        // Calcula o preço atual com base nos degraus de arrecadação.
         const currentPrice = price0 * Math.pow(1.1, Math.floor(raised / 1_000_000));
         document.getElementById('priceNow').textContent = fmtBRL(currentPrice);
         document.getElementById('raisedNow').textContent = fmtBRL(raised);
       }
 
-      // Simula o crescimento de dados em tempo real.
       function simulateRealtimeData() {
         const now = Date.now();
-        const timeDiff = (now - lastUpdate) / 1000; // diferença em segundos
-        
-        // Ajustar a taxa de atualização baseada no tempo
+        const timeDiff = (now - lastUpdate) / 1000;
         const tokensPerSecond = 1000 / timeDiff;
         const reaisPerSecond = 250 / timeDiff;
-        
         sold += Math.floor(tokensPerSecond);
         raised += Math.floor(reaisPerSecond);
-        
         if (sold > soldGoal) {
           sold = soldGoal;
         }
-        
         renderHero();
-        
-        // Atualizar informações em tempo real
-        realtimeInfo.textContent = Atualizado há ${Math.floor(timeDiff)} segundos - ${Math.floor(tokensPerSecond)} tokens/segundo;
-        
+        realtimeInfo.textContent = `Atualizado há ${Math.floor(timeDiff)} segundos - ${Math.floor(tokensPerSecond)} tokens/segundo`;
         lastUpdate = now;
       }
 
-      // --- Lógica do Formulário de Compra ---
       buyForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const amount = Number(amountInput.value || 0);
         const email = emailInput.value || '';
-
-        // Validação simples
         if (amount < 10) {
           buyMsg.textContent = 'O valor mínimo para compra é R$ 10,00.';
           return;
@@ -322,8 +293,6 @@
           buyMsg.textContent = 'Por favor, insira um e-mail válido.';
           return;
         }
-
-        // Estado de carregamento
         buyBtn.disabled = true;
         buyBtnText.textContent = 'Gerando...';
         buyBtnSpinner.classList.remove('hidden');
@@ -332,11 +301,8 @@
         paymentActions.classList.add('hidden');
 
         try {
-          // Checa se o URL do backend ainda é o placeholder
           if (backendURL.includes("seu-backend-aqui")) {
-              // Modo de demonstração: simula uma resposta do backend com um atraso de 1.5 segundos
               await new Promise(resolve => setTimeout(resolve, 1500));
-              
               const demoData = {
                   init_point: "https://www.mercadopago.com.br/checkout/v1/redirect?pref_id=123456789",
                   point_of_interaction: {
@@ -345,10 +311,8 @@
                       }
                   }
               };
-              
               payLink.href = demoData.init_point;
               pixCodeInput.value = demoData.point_of_interaction.transaction_data.qr_code;
-
               qrArea.innerHTML = '';
               qrcode = new QRCode(qrArea, {
                   text: demoData.point_of_interaction.transaction_data.qr_code,
@@ -358,7 +322,6 @@
                   colorLight : "#ffffff",
                   correctLevel : QRCode.CorrectLevel.H
               });
-
               qrArea.style.opacity = '1';
               qrHelpText.classList.add('hidden');
               paymentActions.classList.remove('hidden');
@@ -371,13 +334,10 @@
             });
             const data = await res.json();
             if (!res.ok || !data.ok) throw new Error(data.error || 'Falha ao criar preferência de pagamento.');
-            
             const initPoint = data.init_point || data.sandbox_init_point;
             const pixCopyPaste = data.point_of_interaction?.transaction_data?.qr_code;
-
             payLink.href = initPoint;
             pixCodeInput.value = pixCopyPaste || 'Código indisponível';
-
             qrArea.innerHTML = '';
             if (pixCopyPaste) {
               qrcode = new QRCode(qrArea, {
@@ -391,13 +351,11 @@
             } else {
                 qrArea.innerHTML = '<p class="text-xs">Não foi possível gerar o QR Code.</p>';
             }
-
             qrArea.style.opacity = '1';
             qrHelpText.classList.add('hidden');
             paymentActions.classList.remove('hidden');
             buyMsg.textContent = 'Pronto! Escaneie o QR Code ou use o link para pagar.';
           }
-
         } catch (err) {
           buyMsg.textContent = 'Erro: ' + err.message;
         } finally {
@@ -414,7 +372,6 @@
           setTimeout(() => { copyBtn.textContent = 'Copiar código PIX'; }, 2000);
       });
 
-      // --- LÓGICA DO SIMULADOR ---
       simForm.addEventListener('submit', (e)=>{
         e.preventDefault();
         const start = Number(document.getElementById('simStart').value || 0.25);
@@ -440,10 +397,8 @@
         document.getElementById('simMsg').textContent = 'Modelo demonstrativo. Ajuste os parâmetros para sua campanha.';
       });
       
-      // --- INICIALIZAÇÃO ---
       yearEl.textContent = new Date().getFullYear();
       renderHero();
-      // O setInterval para a simulação de dados em tempo real
       setInterval(simulateRealtimeData, 2000);
       simForm.dispatchEvent(new Event('submit'));
     });
